@@ -15,13 +15,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
-
+/**
+ * This class is used to handle the rest API Request, this implements a ProcessorService interface
+ * @author Elyes CHERFA
+ */
 @Service
 public class ProcessorService implements ProcessorServiceInterface{
 
+	/**
+	 * Contains the names of all the processors
+	 */
 	private List<String> processors;
 	//private ResponseEntity<List<ProcessorOutputData>> response;
 	
+	/**
+	 * Used to 
+	 * @param History Number of data records to fetch from the processor data history
+	 * @param type Processor Data Type to return back (Min, Max or Average) 
+	 * @return A Response Entity with the output data of all the processors (if everything works perfectly) and a Http code to describe the Http status. Otherwise, it returns a HttpStatus only.
+	 */
 	@Override
 	public ResponseEntity<List<ProcessorOutputData>> getProcessorsTime(int history, ProcessorOperationType type) {
 		// Create the response entity and initialize it with an Unavailable Service Http status
@@ -31,11 +43,9 @@ public class ProcessorService implements ProcessorServiceInterface{
 			this.fetchProcessorsData();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Here");
 		}
 			
 		if(processors!= null && !processors.isEmpty()) {
-			System.out.println("Here also");
 			// create an executor that will invoke the different Callables (Threads with a response)
 			ExecutorService executor = Executors.newFixedThreadPool(processors.size());
 			// create a ProcessorInfoHandler for each processor and add its reference to the handler list 
@@ -80,6 +90,9 @@ public class ProcessorService implements ProcessorServiceInterface{
 		return response;
 	}
 
+	/**
+	 * Fetch the processors data from the webservice 
+	 */
 	@Override
 	public void fetchProcessorsData() throws Exception{
 		// Web service URL
