@@ -1,6 +1,5 @@
 package com.sentrysoftware.processordata.processor;
 
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.springframework.web.reactive.function.client.WebClient;
@@ -9,7 +8,7 @@ public class ProcessorDataHandler implements Callable<ProcessorOutputData>{
 
 	private String processorName;
 	private int history;
-	private List<ProcessorDataHistoryRecord> processorHistory;
+	private ProcessorDataHistory processorDataHistory;
 	private ProcessorOperationType type;
 	
 	public ProcessorDataHandler(String processorName, int history, ProcessorOperationType type) {
@@ -25,7 +24,9 @@ public class ProcessorDataHandler implements Callable<ProcessorOutputData>{
 			this.fetchProcessorHistory();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}		
+		}
+		
+		if(processorDataHistory!= null && processorDataHistory.getHistory()!= null && !processorDataHistory.getHistory().isEmpty()) {
 			ProcessorOutputData output = new ProcessorOutputData();
 			output.setName(processorName);
 			// 
@@ -38,31 +39,32 @@ public class ProcessorDataHandler implements Callable<ProcessorOutputData>{
 				break;
 			case AVG:
 				output.setValue(this.getAvg());
-				break;
+				break; 
 			}
-			//
-			return output;		
+			return output;
+		}
+		return null;
+					
 	}
 	
 	public void fetchProcessorHistory() throws Exception{ 
 		String url = "https://xdemo.sentrysoftware.com/rest/console/NT_CPU/"+ processorName +"/CPUprcrProcessorTimePercent?max=" + history;
 		WebClient.Builder builder = WebClient.builder();
-		ProcessorDataHistory processorDataHistory = builder.build().get().uri(url).retrieve().bodyToMono(ProcessorDataHistory.class).block();
-		processorHistory = processorDataHistory.getHistory();
+		processorDataHistory = builder.build().get().uri(url).retrieve().bodyToMono(ProcessorDataHistory.class).block();
 	}
 	
 	public double getMax() {
-		double max = processorHistory.stream().mapToDouble(d -> d.getValue()).max().orElseThrow();
+		double max = processorDataHistory.getHistory().stream().mapToDouble(d -> d.getValue()).max().orElseThrow();
 		return max;
 	}
 	
 	public double getMin() {
-		double min = processorHistory.stream().mapToDouble(d -> d.getValue()).min().orElseThrow();
+		double min = processorDataHistory.getHistory().stream().mapToDouble(d -> d.getValue()).min().orElseThrow();
 		return min;
 	}
 	
 	public double getAvg() {
-		double avg = processorHistory.stream().mapToDouble(d -> d.getValue()).average().orElseThrow();
+		double avg = processorDataHistory.getHistory().stream().mapToDouble(d -> d.getValue()).average().orElseThrow();
 		return avg;
 	}
 	
