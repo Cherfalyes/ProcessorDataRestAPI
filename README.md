@@ -61,7 +61,8 @@ mvn javadoc:javadoc
 ### Creating Jar from the project
 #### Eclipse
 1. Open your pom.xml file
-2. right click -> Run as -> Maven generate-sources
+2. Right click -> Run as -> Maven build...
+3. Goals: `package` -> Run
 #### Linux
 Using command lines, go to the project file at the same level as pom.xml and execute the following command:
 ```bash
